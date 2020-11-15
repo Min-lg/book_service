@@ -15,6 +15,5 @@ var movie = new mongoose.Schema({
 movie.statics.findById = function (movie_id, callBack) {
   this.find({ _id: movie_id }, callBack)
 }
-
 var movieModel = mongoose.model('movie', movie)
 module.exports = movieModel

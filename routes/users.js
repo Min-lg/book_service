@@ -3,9 +3,12 @@ var router = express.Router();
 var user = require('../models/user')
 var crypto = require('crypto')
 var movie = require('../models/movie.js')
-// var mail = require('../models/mail')
+var mail = require('../models/mail')
 var comment = require('../models/comment')
 const init_token = 'TKLO2o'
+
+/* 未解决的问题---用户点赞support，用户下载download-----page 152 */
+
 
 /* GET users listing. */
 // 用户登录
@@ -102,7 +105,7 @@ router.post('/support', function (req, res, next) {
     //更新操作
     movie.update({ _id: req.body.movie_id }, { movieNumSuppose: supportMovie.movieNumSuppose + 1 }, function (err) {
       if (err) {
-        res.json({ status: 1, message: "点赞失败", data: err })
+        res.json({ status: 1, message: "点赞失败", data: supportMovie })
       }
       res.json({ status: 0, message: "点赞成功" })
     })
@@ -177,8 +180,72 @@ router.post('/findPassword', function (req, res, next) {
 });
 // 用户发送站内信
 router.post('/sendEmail', function (req, res, next) {
-  // 用户显示站内信，receive参数值为1时是发送的内容，值为2是收到的内容
+  // 验证完整性，这里用简单的if,可更改为正则
+  if (!req.body.token) {
+    res.json({ status: 1, message: "用户登录状态错误" })
+  }
+  if (!req.body.user_id) {
+    res.json({ status: 1, message: "用户状态出错" })
+  }
+  if (!req.body.toUserName) {
+    res.json({ status: 1, message: "未选择相关用户" })
+  }
+  if (!req.body.title) {
+    res.json({ status: 1, message: "标题不能为空" })
+  }
+  if (!req.body.context) {
+    res.json({ status: 1, message: "内容不能为空" })
+  }
+  if (req.body.token == getMD5Password(req.body.user_id)) {
+    // 存入数据库之前要先在数据库中获取到要发送至用户的user_id
+    user.findByUsername(req.body.toUserName, function (err, toUser) {
+      if (toUser.length != 0) {
+        var NewEmail = new mail({
+          fromUser: req.body.user_id,
+          toUser: toUser[0]._id,
+          title: req.body.title,
+          context: req.body.context
+        })
+        NewEmail.save(function () {
+          res.json({ status: 1, message: "发送成功" })
+        })
+      } else {
+        res.json({ status: 1, message: "发送的对象不存在" })
+      }
+    })
+  } else {
+    res.json({ status: 1, message: "用户登录错误" })
+  }
 });
+// 用户显示站内信，receive参数值为1时是发送的内容，值为2是收到的内容
+router.post('/showEmail', function (req, res, next) {
+  // 验证完整性，这里使用简单的if方式，可以使用正则表达式对输入的格式进行验证
+  if (!req.body.token) {
+    res.json({ status: 1, message: "用户登录状态错误" })
+  }
+  if (!req.body.user_id) {
+    res.json({ status: 1, message: "用户状态出错" })
+  }
+  if (!req.body.receive) {
+    res.json({ status: 1, message: "参数出错" })
+  }
+  if (req.body.token == getMD5Password(req.body.user_id)) {
+    if (req.body.receive == 1) {
+      // 发送的站内信
+      mail.findByFromUserId(req.body.user_id, function (err, sendMail) {
+        res.json({ status: 0, message: "获取成功", data: sendMail })
+      })
+    } else {
+      // 收到的站内信
+      mail.findByToUserId(req.body.user_id, function (err, receiveMail) {
+        res.json({ status: 0, message: "获取成功", data: receiveMail })
+      })
+    }
+  } else {
+    res.json({ status: 1, message: "用户登录错误" })
+  }
+})
+
 // 获取MD5值
 function getMD5Password(id) {
   var md5 = crypto.createHash('md5')
