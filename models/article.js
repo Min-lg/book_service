@@ -2,9 +2,10 @@
 var mongoose = require('../common/db')
 // 数据库的数据集
 var article = new mongoose.Schema({
-  acticleTitle: String,
-  acticleContext: String,
-  acticleTime: String
+  articleTitle: String,
+  articleContext: String,
+  articleTime: String,
+  articleMainPage:Boolean
 })
 // 通过ID查找
 article.statics.findByArticleId = function (id, callBack) {

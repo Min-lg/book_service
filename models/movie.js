@@ -15,5 +15,9 @@ var movie = new mongoose.Schema({
 movie.statics.findById = function (movie_id, callBack) {
   this.find({ _id: movie_id }, callBack)
 }
+// 查询所有信息
+movie.statics.findAll = function (callBack) {
+  this.find({}, callBack)
+}
 var movieModel = mongoose.model('movie', movie)
 module.exports = movieModel
