@@ -11,5 +11,9 @@ var article = new mongoose.Schema({
 article.statics.findByArticleId = function (id, callBack) {
   this.find({ _id: id }, callBack)
 }
+// 查询全部数据
+article.statics.findAll = function (callBack) {
+  this.find({}, callBack)
+}
 var articleModel = mongoose.model('article', article)
 module.exports = articleModel
