@@ -36,9 +36,15 @@ router.get('/showIndex', function (req, res, next) {
   })
 })
 // 显示所有的排行榜，也就是对于电影字段的index样式
-router.get('/showRanking', function (req, res, next) {
-  movie.find({ movieMainPage: true }, function (err, getMovies) {
-    res.json({ status: 0, message: "获取主页", data: getMovies })
+// router.get('/showRanking', function (req, res, next) {
+//   movie.find({ movieMainPage: true }, function (err, getMovies) {
+//     res.json({ status: 0, message: "获取主页", data: getMovies })
+//   })
+// })
+// 显示电影列表
+router.get('/showMovies',function(req,res,next){
+  movie.findAll(function(err,getMovies){
+    res.json({ status: 0, message: "获取所有电影", data: getMovies })
   })
 })
 // 显示文章列表
